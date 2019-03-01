@@ -24,6 +24,7 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
                 <TextBlock Text="Kinect Viewbox" FontSize="20" FontFamily="Segoe UI" FontWeight="SemiBold" Grid.Row="0" Margin="5"/>
@@ -31,6 +32,27 @@
                     <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
                 </Viewbox>
             </StackPanel>
+            
+            <Grid x:Name="gestureResultGrid" Grid.Column="0" Grid.Row="1" Width="Auto" Margin="5" VerticalAlignment="Top">
+                <Grid.Style>
+                    <Style TargetType="{x:Type Grid}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsTracked}" Value="True">
+                                <Setter Property="Background" Value="CornflowerBlue"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsTracked}" Value="False">
+                                <Setter Property="Background" Value="LightGray"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Gesture Results" FontSize="20" FontFamily="Segoe UI" FontWeight="SemiBold" Grid.Row="0" Margin="5"/>
+                <TextBlock Text="{Binding HandsUpProgress, StringFormat='Hands Up Progress: {0}'}" FontSize="18" FontFamily="Segoe UI" FontWeight="SemiBold" Grid.Row="4" Margin="5"/>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

@@ -1,11 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Media;
-using Microsoft.Kinect;
-
+﻿//------------------------------------------------------------------------------
+// <copyright file="KinectBodyView.cs" company="Microsoft">
+//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// </copyright>
+//------------------------------------------------------------------------------
 namespace BodyKinect
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Windows;
+    using System.Windows.Media;
+    using Microsoft.Kinect;
     /// <summary>
     /// Visualizaciòn del cuerpo del Kinect para mostrarlo en la interfaz de usuario
     /// </summary>

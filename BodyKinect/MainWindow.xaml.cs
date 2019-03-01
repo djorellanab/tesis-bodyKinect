@@ -11,7 +11,7 @@ namespace BodyKinect
     /// <summary>
     /// Lógica de interacción para MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public partial class MainWindow : Window, INotifyPropertyChanged, IDisposable
     {
         #region Atributos
         /// <summary>
@@ -44,7 +44,15 @@ namespace BodyKinect
         /// </summary>
         private KinectBodyView kinectBodyView = null;
 
-        /// Falta los datos de Analizador de gesturas
+        /// <summary>
+        /// Detector de posturas 
+        /// </summary>
+        private GestureDetector gestureDetector = null;
+
+        /// <summary>
+        /// Objeto que almacena y actualiza los datos a la interfaz de usuario
+        /// </summary>
+        private GestureResultView gestureResultView = null;
 
         /// <summary>
         /// Temporizador de actualizacion de los frames de kinect cada 60 fps
@@ -102,11 +110,41 @@ namespace BodyKinect
             // Objeto que renderiza el cuerpo en la interfaz de usuario
             this.kinectBodyView = new KinectBodyView(this.kinectSensor);
 
-            // Analizador de gestores
+            // Instancia el objeto con valores por defecto
+            this.gestureResultView = new GestureResultView(false, -1.0f);
+
+            // Herramienta que detecta las posturas Con el sensor kinect 
+            this.gestureDetector = new GestureDetector(this.kinectSensor, this.gestureResultView);
 
             // Asigna los datos a la interfaz
             this.DataContext = this;
             this.kinectBodyViewbox.DataContext = this.kinectBodyView;
+            this.gestureResultGrid.DataContext = this.gestureResultView;
+        }
+
+        /// <summary>
+        /// metodo que limpia todos los objetos respectivos
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Limpia el detector de gesturas
+        /// </summary>
+        /// <param name="disposing">Verdadero, si esta llamando directamente el emtodo</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this.gestureDetector != null)
+                {
+                    this.gestureDetector.Dispose();
+                    this.gestureDetector = null;
+                }
+            }
         }
 
         #endregion
@@ -185,7 +223,29 @@ namespace BodyKinect
                 // actualiza el nuevo cuerpo
                 this.kinectBodyView.UpdateBodyData(activeBody);
 
-                // Analisis de gestura
+                // Verifca nueva postura
+                if (activeBody.TrackingId != this.gestureDetector.TrackingId)
+                {
+                    // Actualiza nueva postura
+                    this.gestureDetector.TrackingId = activeBody.TrackingId;
+                }
+
+                // Sin postura detectada
+                if (this.gestureDetector.TrackingId == 0)
+                {
+                    // Pausa el detector y coloca los valores por defecto
+                    this.gestureDetector.IsPaused = true;
+                    this.gestureResultView.UpdateGestureResult(false, -1.0f);
+                }
+                else // Con postura detectada
+                {
+                    // Activa el detector
+                    this.gestureDetector.IsPaused = false;
+                }
+
+
+                // Actualiza la interfaz de usuario con las ultimas posturas
+                this.gestureDetector.UpdateGestureData();
             }
         }
 
@@ -271,13 +331,13 @@ namespace BodyKinect
                 this.bodyFrameReader.Dispose();
                 this.bodyFrameReader = null;
             }
-            /*
+            // Limpieza del detector
             if (this.gestureDetector != null)
             {
                 // The GestureDetector contains disposable members (VisualGestureBuilderFrameSource and VisualGestureBuilderFrameReader)
                 this.gestureDetector.Dispose();
                 this.gestureDetector = null;
-            }*/
+            }
 
             // Verifico que el kinect esta utlizando
             if (this.kinectSensor != null)
